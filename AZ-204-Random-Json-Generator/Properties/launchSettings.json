@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "AZ-204-Random-Json-Generator": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}
