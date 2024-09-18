@@ -7,42 +7,65 @@ namespace AZ_204_Random_Json_Generator
     {
         static async Task Main(string[] args)
         {
+            string connectionString = string.Empty;
+
+            Console.Write("Random string generator console application. ");
+            //connectionString = Console.ReadLine();
             string outputDirectory = "GeneratedJsonFiles";
             if (!Directory.Exists(outputDirectory))
             {
                 Directory.CreateDirectory(outputDirectory);
             }
 
-            string connectionString = "UseDevelopmentStorage=true"; // Replace with your Azure Storage connection string
+            Console.Write($"{System.Environment.NewLine}All generated file will be stored in local directory at. {outputDirectory} ");
+
+            Console.Write($"{System.Environment.NewLine}Enter the azure storage connection string. For simulator use  : UseDevelopmentStorage=true  :  ");
+           
+
+            connectionString = Console.ReadLine();// "UseDevelopmentStorage=true"; // Replace with your Azure Storage connection string
+            
             string containerName = "genabc"; // Replace with your Azure Blob Storage container name
 
-            BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
-            BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+            Console.Write($"{System.Environment.NewLine}All json file will be uploaded in {containerName}  container in storage account");
 
-            // Create container if it doesn't exist
-            await containerClient.CreateIfNotExistsAsync();
-
-            Random random = new Random();
-
-            // Generate 100 random JSON files
-            for (int i = 1; i <= 100; i++)
+            try
             {
-                // Create a random JSON structure with at least 6 properties
-                var randomJson = GenerateJsonWithMinimumProperties(random);
 
-                // Serialize the JSON object to a file
-                string jsonString = JsonSerializer.Serialize(randomJson, new JsonSerializerOptions { WriteIndented = true });
-                string fileName = $"random_json_{i}.json";
-                string filePath = Path.Combine(outputDirectory, fileName);
 
-                File.WriteAllText(filePath, jsonString);
-                Console.WriteLine($"Generated: {filePath}");
 
-                // Upload the generated JSON file to Azure Blob Storage
-                await UploadFileToBlobStorage(containerClient, filePath, fileName);
+                BlobServiceClient blobServiceClient = new BlobServiceClient(connectionString);
+                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient(containerName);
+
+                // Create container if it doesn't exist
+                await containerClient.CreateIfNotExistsAsync();
+
+                Random random = new Random();
+
+                // Generate 100 random JSON files
+                for (int i = 1; i <= 100; i++)
+                {
+                    // Create a random JSON structure with at least 6 properties
+                    var randomJson = GenerateJsonWithMinimumProperties(random);
+
+                    // Serialize the JSON object to a file
+                    string jsonString = JsonSerializer.Serialize(randomJson, new JsonSerializerOptions { WriteIndented = true });
+                    string fileName = $"random_json_{i}.json";
+                    string filePath = Path.Combine(outputDirectory, fileName);
+
+                    File.WriteAllText(filePath, jsonString);
+                    Console.WriteLine($"Generated: {filePath}");
+
+                    // Upload the generated JSON file to Azure Blob Storage
+                    await UploadFileToBlobStorage(containerClient, filePath, fileName);
+                }
+
+                Console.WriteLine("{System.Environment.NewLine}100 random JSON files generated and uploaded to Azure Blob Storage successfully.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{System.Environment.NewLine}Exception : {ex.Message.ToString()}");
             }
 
-            Console.WriteLine("100 random JSON files generated and uploaded to Azure Blob Storage successfully.");
         }
 
         // Function to generate a JSON object with at least 6 properties
